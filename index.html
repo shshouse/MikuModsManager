@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/src/assets/tauri.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Miku补丁模组管理器</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <div class="app-logo">
+                    <div class="logo-icon">M</div>
+                    <span class="app-title">MikuMods~</span>
+                </div>
+            </div>
+            <div class="top-bar-right">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <img src="/src-tauri/icons/icon.png" alt="User Avatar" />
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">MikuMods User</span>
+                        <span class="user-status">Offline</span>
+                    </div>
+                    <div class="user-menu-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6,9 12,15 18,9"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <nav class="sidebar-nav">
+                    <div class="nav-section">
+                        <h3 class="nav-section-title">功能</h3>
+                        <ul class="nav-list">
+                            <li class="nav-item active">
+                                <a href="#" class="nav-link" data-page="mod-manager">
+                                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14,2 14,8 20,8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        <polyline points="10,9 9,9 8,9"></polyline>
+                                    </svg>
+                                    <span>模组安装与恢复</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="nav-section">
+                        <h3 class="nav-section-title">工具</h3>
+                        <ul class="nav-list">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link" data-page="settings">
+                                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                    </svg>
+                                    <span>设置</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link" data-page="about">
+                                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                    </svg>
+                                    <span>关于</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- 模组安装与恢复页面 -->
+                <div class="page active" id="mod-manager-page">
+                    <div class="page-header">
+                        <h1 class="page-title">模组安装与恢复</h1>
+                        <p class="page-subtitle">一站式管理游戏模组：安装、恢复</p>
+                    </div>
+                    
+                    <div class="mod-manager-content">
+                        <div class="mod-manager-toolbar">
+                            <button class="toolbar-btn scan-games" onclick="scanGames()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <path d="M21 21l-4.35-4.35"></path>
+                                </svg>
+                                扫描游戏
+                            </button>
+                        </div>
+                        <div class="games-list-container">
+                            <!-- Games list will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page" id="settings-page">
+                    <div class="page-header">
+                        <h1 class="page-title">设置</h1>
+                        <p class="page-subtitle">配置您的偏好设置</p>
+                    </div>
+                    <div class="settings-content">
+                        <div class="settings-section">
+                            <h3>miku允许你自己设置头像和名字哦！</h3>
+                            <div class="setting-item">
+                                <label for="user-name">修改名字</label>
+                                <input type="text" id="user-name" class="setting-input" placeholder="请输入您的用户名">
+                                <button class="setting-btn" onclick="updateUserName()">更新用户名</button>
+                            </div>
+                            <div class="setting-item">
+                                <label for="user-avatar">上传本地头像</label>
+                                <input type="file" id="user-avatar" class="setting-input" accept="image/*">
+                                <button class="setting-btn" onclick="updateUserAvatar()">更新头像</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page" id="about-page">
+                    <div class="page-header">
+                        <h1 class="page-title">关于</h1>
+                        <p class="page-subtitle">关于Miku模组管理器的信息</p>
+                    </div>
+                    <div class="coming-soon">
+                        <h3>关于页面即将推出</h3>
+                        <p>此功能正在开发中</p>
+                    </div>
+                </div>
+
+                <!-- Game Details Page -->
+                <div class="page" id="game-details-page">
+                    <div class="page-header">
+                        <button class="back-btn" onclick="goBack()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 12H5"></path>
+                                <polyline points="12,19 5,12 12,5"></polyline>
+                            </svg>
+                            返回
+                        </button>
+                        <h1 class="page-title" id="game-details-title">游戏详情</h1>
+                        <p class="page-subtitle">管理您的游戏和模组</p>
+                    </div>
+                    <div class="game-details-content">
+                        <div class="details-card">
+                            <h2>游戏信息</h2>
+                            <div class="game-info-section">
+                                <div class="info-item">
+                                    <label>游戏名称：</label>
+                                    <span id="game-name-display">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>游戏路径：</label>
+                                    <div class="path-container">
+                                        <input type="text" id="game-path-input" class="path-input" readonly data-original-path="">
+                                        <button class="path-edit-btn" onclick="editGamePath(document.getElementById('game-name-display').textContent)">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                            </svg>
+                                        </button>
+                                        <button class="open-folder-btn" onclick="openGameFolder(document.getElementById('game-path-input').value)">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                            </svg>
+                                            打开文件夹
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="details-card">
+                            <h2>模组管理</h2>
+                            <div class="mod-info-section">
+                                <div class="info-item">
+                                    <label>模组路径：</label>
+                                    <div class="path-container">
+                                        <input type="text" id="mod-path-input" class="path-input" readonly>
+                                        <button class="open-folder-btn" onclick="openModFolder(document.getElementById('game-name-display').textContent)">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                            </svg>
+                                            打开模组文件夹
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <label>可用模组：</label>
+                                    <span id="available-mods-count">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>备份记录：</label>
+                                    <span id="used-mods-count">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="details-card">
+                            <h2>可用模组</h2>
+                            <div class="available-mods-section">
+                                <div id="available-mods-list" class="mods-list">
+                                    <!-- Available mods will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="details-card">
+                            <h2>备份与恢复</h2>
+                            <div class="backup-section">
+                                <div id="backup-list" class="backup-list">
+                                    <!-- Backup list will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
