@@ -3,11 +3,8 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use winreg::RegKey;
 use winreg::enums::*;
-use chrono::{DateTime, Local};
-use std::io::Write;
+use chrono::Local;
 use std::collections::HashMap;
-use tauri::Manager;
-use std::process::Command as StdCommand;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ModInfo {
