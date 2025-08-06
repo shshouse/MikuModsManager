@@ -219,19 +219,9 @@ async function editGamePath(gameName: string) {
     // If a folder was selected, update the game path
     if (selectedFolder) {
       const gameRow = document.querySelector(`[data-game-name="${gameName}"]`);
-      if (!gameRow) {
-        console.error(`Game row not found for: ${gameName}`);
-        alert(`未找到游戏行: ${gameName}`);
-        return;
-      }
+      if (!gameRow) return;
 
       const pathInput = gameRow.querySelector('.path-input') as HTMLInputElement;
-      if (!pathInput) {
-        console.error(`Path input not found for game: ${gameName}`);
-        alert(`未找到路径输入框: ${gameName}`);
-        return;
-      }
-
       pathInput.value = selectedFolder as string;
       
       // Save the new path
@@ -239,7 +229,7 @@ async function editGamePath(gameName: string) {
     }
   } catch (error) {
     console.error('Failed to select folder:', error);
-    alert(`选择文件夹失败: ${error instanceof Error ? error.message : String(error)}`);
+    alert(`选择文件夹失败: ${error}`);
   }
 }
 
