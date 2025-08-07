@@ -81,11 +81,32 @@ export class GameDetailsManager {
           <button class="install-btn" onclick="window.modManager.installMod('${mod.name}', '${gameName}', '${gamePath}')">
             安装模组
           </button>
+          <button class="open-folder-btn" onclick="window.gameDetailsManager.openModFolder('${mod.path}')">
+            打开文件夹
+          </button>
         </div>
       </div>
     `).join('');
 
     modsContainer.innerHTML = modsHtml;
+  }
+
+  async openModFolder(modPath: string): Promise<void> {
+    try {
+      // 使用Tauri的shell功能打开模组文件夹
+      const { invoke } = (window as any).__TAURI__ || {};
+      if (invoke) {
+        await invoke('open_folder', { 
+          path: modPath 
+        });
+      } else {
+        // 如果TAURI不可用，显示提示
+        alert(`模组文件夹路径:\n${modPath}`);
+      }
+    } catch (error) {
+      console.error('打开模组文件夹失败:', error);
+      alert(`打开模组文件夹失败: ${error}`);
+    }
   }
 
   private displayBackupList(backups: BackupInfo[], gameName: string, gamePath: string): void {
@@ -113,6 +134,7 @@ export class GameDetailsManager {
           <button class="restore-btn" onclick="window.modManager.restoreFromBackup('${gameName}', '${backup.timestamp}', '${gamePath}')">
             恢复此状态
           </button>
+
         </div>
       </div>
     `).join('');

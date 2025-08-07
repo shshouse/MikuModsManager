@@ -30,4 +30,30 @@ export class ModManager {
       alert(`恢复备份失败: ${error}`);
     }
   }
+
+  async uninstallMod(modName: string, gameName: string): Promise<void> {
+    try {
+      const result = await ModAPI.uninstallMod(modName, gameName);
+      console.log(`Successfully uninstalled mod: ${modName}`);
+      alert(result);
+      
+      // Refresh mod manager data
+      await this.gameManager.loadModManagerPage();
+    } catch (error) {
+      console.error(`Failed to uninstall mod: ${modName}`, error);
+      alert(`卸载模组失败: ${error}`);
+    }
+  }
+
+  async getModFiles(modName: string, gameName: string): Promise<string[]> {
+    try {
+      const files = await ModAPI.getModFiles(modName, gameName);
+      console.log(`Successfully retrieved ${files.length} files for mod: ${modName}`);
+      return files;
+    } catch (error) {
+      console.error(`Failed to get mod files: ${modName}`, error);
+      alert(`获取模组文件列表失败: ${error}`);
+      return [];
+    }
+  }
 }

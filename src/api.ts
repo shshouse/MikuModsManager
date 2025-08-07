@@ -51,6 +51,14 @@ export class ModAPI {
   static async installMod(modName: string, gameName: string, gamePath: string): Promise<string> {
     return await invoke("install_mod", { modName, gameName, gamePath }) as string;
   }
+
+  static async uninstallMod(modName: string, gameName: string): Promise<string> {
+    return await invoke("uninstall_mod", { modName, gameName }) as string;
+  }
+
+  static async getModFiles(modName: string, gameName: string): Promise<string[]> {
+    return await invoke("get_mod_files", { modName, gameName }) as string[];
+  }
 }
 
 export class BackupAPI {

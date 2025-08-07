@@ -554,32 +554,171 @@ fn install_mod(mod_name: String, game_name: String, game_path: String) -> Result
 
 #[tauri::command]
 fn uninstall_mod(mod_name: String, game_name: Option<String>) -> Result<String, String> {
-    // TODO: Implement actual mod uninstallation logic
-    // This is a placeholder implementation
-    println!("Uninstalling mod: {} for game: {:?}", mod_name, game_name);
+    let game_name = game_name.ok_or("游戏名称不能为空")?;
     
-    // Simulate uninstallation process
-    std::thread::sleep(std::time::Duration::from_millis(800));
+    // Get executable directory
+    let exe_path = std::env::current_exe()
+        .map_err(|e| format!("获取执行路径失败: {}", e))?;
     
-    Ok(format!("Successfully uninstalled mod: {}", mod_name))
+    let exe_dir = exe_path.parent()
+        .ok_or("获取执行目录失败")?;
+    
+    // Find the backup directory for this mod
+    let backup_path = exe_dir
+        .join("games")
+        .join(sanitize_folder_name(&game_name))
+        .join("backup");
+    
+    if !backup_path.exists() {
+        return Err("未找到备份文件夹".to_string());
+    }
+    
+    // Find the most recent backup for this mod
+    let mut latest_backup = None;
+    let mut _latest_timestamp = String::new();
+    
+    match fs::read_dir(&backup_path) {
+        Ok(entries) => {
+            for entry in entries.filter_map(Result::ok) {
+                let backup_dir_path = entry.path();
+                if backup_dir_path.is_dir() {
+                    if let Some(timestamp_os_str) = backup_dir_path.file_name() {
+                        if let Some(timestamp_str) = timestamp_os_str.to_str() {
+                            let log_path = backup_dir_path.join("install.log");
+                            if log_path.exists() {
+                                if let Ok((backup_mod_name, _)) = read_install_log(&log_path) {
+                                    if backup_mod_name == mod_name {
+                                        latest_backup = Some(backup_dir_path.clone());
+                                        _latest_timestamp = timestamp_str.to_string();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Err(e) => return Err(format!("读取备份目录失败: {}", e)),
+    }
+    
+    let backup_dir = latest_backup.ok_or(format!("未找到模组 '{}' 的备份", mod_name))?;
+    
+    // Read install log to get the game path and files
+    let log_path = backup_dir.join("install.log");
+    let (found_mod_name, files) = read_install_log(&log_path)?;
+    
+    if found_mod_name != mod_name {
+        return Err(format!("备份中的模组名称不匹配: 期望 {}, 实际 {}", mod_name, found_mod_name));
+    }
+    
+    // Find game path from the log file
+    let game_path = extract_game_path_from_log(&log_path)?;
+    
+    // Restore the original files (effectively uninstalling the mod)
+    restore_files_from_backup(&backup_dir, &PathBuf::from(&game_path), &files)?;
+    
+    // Clean up the backup directory
+    if let Err(e) = fs::remove_dir_all(&backup_dir) {
+        eprintln!("清理备份目录失败: {}", e);
+    }
+    
+    Ok(format!("成功卸载模组: {}", mod_name))
+}
+
+fn extract_game_path_from_log(log_path: &Path) -> Result<String, String> {
+    let _log_content = fs::read_to_string(log_path)
+        .map_err(|e| format!("读取安装日志失败: {}", e))?;
+    
+    // The game path should be in the log file format
+    // We need to get it from the backup directory structure or from the log
+    let exe_path = std::env::current_exe()
+        .map_err(|e| format!("获取执行路径失败: {}", e))?;
+    
+    let exe_dir = exe_path.parent()
+        .ok_or("获取执行目录失败")?;
+    
+    // Try to find the game path from the backup structure
+    let backup_parent = log_path.parent()
+        .ok_or("无法获取备份目录")?;
+    
+    // Look for the game_config.json to get the game path
+    let config_path = exe_dir.join("games_config.json");
+    if config_path.exists() {
+        let config_content = fs::read_to_string(&config_path)
+            .map_err(|e| format!("读取配置文件失败: {}", e))?;
+        
+        let games_config: HashMap<String, String> = serde_json::from_str(&config_content)
+            .map_err(|e| format!("解析配置文件失败: {}", e))?;
+        
+        // Find the game name from the backup directory structure
+        let game_name = backup_parent.parent()
+            .and_then(|p| p.file_name())
+            .and_then(|n| n.to_str())
+            .ok_or("无法从备份路径获取游戏名称")?;
+        
+        return games_config.get(game_name)
+            .cloned()
+            .ok_or(format!("未找到游戏 '{}' 的配置路径", game_name));
+    }
+    
+    Err("无法确定游戏路径".to_string())
 }
 
 #[tauri::command]
 fn get_mod_files(mod_name: String, game_name: Option<String>) -> Result<Vec<String>, String> {
-    // TODO: Implement actual file listing logic
-    // This is a placeholder implementation
-    println!("Getting files for mod: {} in game: {:?}", mod_name, game_name);
+    let game_name = game_name.ok_or("游戏名称不能为空")?;
     
-    // Simulate file listing
-    let mock_files = vec![
-        format!("{}/main.dll", mod_name),
-        format!("{}/config.ini", mod_name),
-        format!("{}/readme.txt", mod_name),
-        format!("{}/assets/texture1.dds", mod_name),
-        format!("{}/assets/texture2.dds", mod_name),
-    ];
+    // Get executable directory
+    let exe_path = std::env::current_exe()
+        .map_err(|e| format!("获取执行路径失败: {}", e))?;
     
-    Ok(mock_files)
+    let exe_dir = exe_path.parent()
+        .ok_or("获取执行目录失败")?;
+    
+    // Construct mod directory path
+    let mod_path = exe_dir
+        .join("games")
+        .join(sanitize_folder_name(&game_name))
+        .join("patch")
+        .join(sanitize_folder_name(&mod_name));
+    
+    if !mod_path.exists() {
+        return Err(format!("模组 '{}' 不存在", mod_name));
+    }
+    
+    // Get all files in the mod directory recursively
+    let mut files = Vec::new();
+    get_all_files_recursive(&mod_path, &mod_path, &mut files)?;
+    
+    Ok(files)
+}
+
+fn get_all_files_recursive(base_path: &Path, current_path: &Path, files: &mut Vec<String>) -> Result<(), String> {
+    if !current_path.exists() {
+        return Ok(());
+    }
+    
+    match fs::read_dir(current_path) {
+        Ok(entries) => {
+            for entry in entries.filter_map(Result::ok) {
+                let path = entry.path();
+                
+                if path.is_file() {
+                    // Get relative path from the mod directory
+                    if let Ok(relative_path) = path.strip_prefix(base_path) {
+                        files.push(relative_path.to_string_lossy().to_string());
+                    }
+                } else if path.is_dir() {
+                    // Recursively scan subdirectories
+                    get_all_files_recursive(base_path, &path, files)?;
+                }
+            }
+        }
+        Err(e) => return Err(format!("读取目录失败: {}", e)),
+    }
+    
+    Ok(())
 }
 
 fn create_game_folder(game_name: &str) -> Result<(), String> {
